@@ -6,8 +6,19 @@ var temp        = require('temp'),
     exec        = require('child_process').exec,
     rimraf      = require('rimraf'),
     connect     = require('connect'),
-    serveStatic = require('serve-static');
+    serveStatic = require('serve-static'),
+    parseArgs   = require('minimist'),
+    fsextra     = require('fs-extra');
 
+// Parse the command line args
+var argv = parseArgs(process.argv.slice(2));
+var rpms = argv['_']
+
+if (rpms.length === 0) {
+    console.log("You need to specify one or more RPM files.");
+}
+
+// Setup a temporary directory for the repository
 temp.mkdir('ephemeralyum', function(err, dirPath) {
 
     process.stdin.resume();//so the program will not close instantly
@@ -34,20 +45,30 @@ temp.mkdir('ephemeralyum', function(err, dirPath) {
     // Automatically track and cleanup files at exit
     temp.track();
 
-    console.log("Created " + dirPath);
-
     // Copy the RPM into place.
-    fs.createReadStream('/opt/yumrepo/repo/testpackage-1.0-1.x86_64.rpm').pipe(fs.createWriteStream(dirPath + '/testpackage-1.0-1.x86_64.rpm'));
+    rpms.push('END');
+    for (var i in rpms) {
+        if (rpms[i] === "END") {
 
-    var cwd = process.cwd();
-    process.chdir(dirPath);
-    exec('createrepo .', function (error, stdout, stderr) {
-      console.log(stdout)
-      console.log(stderr)
-      console.log("Created Yum Repository at " + process.cwd());
-      process.chdir(cwd);
-    });
+            // Create the repository file structure
+            var cwd = process.cwd();
+            process.chdir(dirPath);
+            exec('createrepo .', function (error, stdout, stderr) {
+              console.log(stdout)
+              console.log(stderr)
+              console.log("Created Yum Repository at " + process.cwd());
+              process.chdir(cwd);
 
-    connect().use(serveStatic(dirPath)).listen(8080);
+              console.log("Repository ready and waiting.")
+              connect().use(serveStatic(dirPath)).listen(8080);
+            });
 
+        } else {
+            console.log("Copying " + rpms[i]);
+            fsextra.copy(rpms[i], dirPath + "/" + path.basename(rpms[i]), function (err) {
+            if (err) return console.error(err)
+            });
+
+        }
+    }
 });
