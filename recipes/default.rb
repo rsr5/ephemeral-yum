@@ -7,6 +7,7 @@
 package 'createrepo'
 package 'nodejs'
 package 'npm'
+package 'wget'
 
 user 'yumrepo'
 
@@ -17,19 +18,21 @@ user 'yumrepo'
   end
 end
 
-remote_file '/opt/yumrepo/repo/tar-1.23-11.el6.x86_64.rpm' do
+cookbook_file 'testpackage-1.0-1.x86_64.rpm' do
   owner 'yumrepo'
   group 'yumrepo'
-  source 'ftp://195.220.108.108/linux/centos/6.6/os/x86_64/Packages/'\
-         'tar-1.23-11.el6.x86_64.rpm'
+  path '/opt/yumrepo/repo/testpackage-1.0-1.x86_64.rpm'
+  action :create
 end
 
 cookbook_file 'ephemeral_yum.js' do
+  owner 'yumrepo'
+  group 'yumrepo'
   path '/opt/yumrepo/ephemeral_yum.js'
   action :create
 end
 
-%w(connect serve-static).each do |package|
+%w(connect serve-static temp).each do |package|
   npm_package package do
     path '/opt/yumrepo/'
     action :install_local
