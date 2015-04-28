@@ -32,7 +32,7 @@ cookbook_file 'ephemeral_yum.js' do
   action :create
 end
 
-%w(connect serve-static temp).each do |package|
+%w(connect serve-static temp rimraf).each do |package|
   npm_package package do
     path '/opt/yumrepo/'
     action :install_local
