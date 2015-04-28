@@ -1,0 +1,10 @@
+name             'ephemeral-yum'
+maintainer       'The Authors'
+maintainer_email 'you@example.com'
+license          'all_rights'
+description      'Installs/Configures ephemeral-yum'
+long_description 'Installs/Configures ephemeral-yum'
+version          '0.1.0'
+
+depends 'yum-epel', '~> 0.6.0'
+depends 'npm', '~> 0.1.2'
