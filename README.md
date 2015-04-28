@@ -1,4 +1,5 @@
 # ephemeral-yum
 
-TODO: Enter the cookbook description here.
+Installs a small NodeJS service that can be used as an ephemeral Yum repsitory.
+
 
