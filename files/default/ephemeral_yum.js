@@ -1,3 +1,9 @@
+#!/usr/bin/env node
+
+/*
+ * A service that creates a Yum repository which only exists for the duration
+ * that the service is active.
+ */
 
 var temp        = require('temp'),
     fs          = require('fs'),
@@ -14,15 +20,14 @@ var temp        = require('temp'),
 
 // Parse the command line args
 var argv = parseArgs(process.argv.slice(2));
-var rpms = argv['b'];
+var rpms = argv['_'];
 if (!_.isArray(rpms)) {
     rpms = [rpms]
 }
-var command = argv['_'][0].split(" ")[0];
-var command_args = argv['_'][0].split(" ").slice(1).join(" ");
+var command = argv["c"].split(" ")[0];
+var command_args = argv["c"].split(" ").slice(1).join(" ");
 if (!_.isArray(command_args)) {
-    command_args = [command_args]
-}
+    command_args = [comma
 console.log(command);
 console.log(command_args);
 
@@ -54,9 +59,6 @@ temp.mkdir('ephemeralyum', function(err, dirPath) {
     // catches uncaught exceptions and cleans up
     process.on('uncaughtException', exitHandler.bind(null, {exit:true}));
 
-    // Automatically track and cleanup files at exit
-    temp.track();
-
     // Copy the RPM into place.
     rpms.push('END');
     for (var i in rpms) {
@@ -83,17 +85,14 @@ temp.mkdir('ephemeralyum', function(err, dirPath) {
                 });
 
                 subcommand.on('close', function (code) {
-                    
-                    temp.cleanup(function() {
+
+                    rimraf(dirPath, function() {
+                        console.log("Removed repo at " + dirpath);
                         console.log("Child finished, exited with " + code);
                         process.exit(code);
                     });
                 });
             });
-
-            console.log("herhe")
-            connect().use(serveStatic(dirPath)).listen(8080);
-            console.log("there")
 
         } else {
             console.log("Copying " + rpms[i]);
@@ -103,4 +102,6 @@ temp.mkdir('ephemeralyum', function(err, dirPath) {
 
         }
     }
+
+    connect().use(serveStatic(dirPath)).listen(8080);
 });
