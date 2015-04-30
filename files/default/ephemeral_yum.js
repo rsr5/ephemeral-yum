@@ -27,7 +27,8 @@ if (!_.isArray(rpms)) {
 var command = argv["c"].split(" ")[0];
 var command_args = argv["c"].split(" ").slice(1).join(" ");
 if (!_.isArray(command_args)) {
-    command_args = [comma
+    command_args = [command_args]
+}
 console.log(command);
 console.log(command_args);
 
@@ -87,7 +88,7 @@ temp.mkdir('ephemeralyum', function(err, dirPath) {
                 subcommand.on('close', function (code) {
 
                     rimraf(dirPath, function() {
-                        console.log("Removed repo at " + dirpath);
+                        console.log("Removed repo at " + dirPath);
                         console.log("Child finished, exited with " + code);
                         process.exit(code);
                     });
@@ -95,13 +96,13 @@ temp.mkdir('ephemeralyum', function(err, dirPath) {
             });
 
         } else {
-            console.log("Copying " + rpms[i]);
-            fsextra.copy(rpms[i], dirPath + "/" + path.basename(rpms[i]), function (err) {
-            if (err) return console.error(err)
-            });
+            console.log("Copying " + rpms[i] + " to " + dirPath + "/" + path.basename(rpms[i]));
+            fsextra.copySync(rpms[i], dirPath + "/" + path.basename(rpms[i]));
 
         }
     }
 
-    connect().use(serveStatic(dirPath)).listen(8080);
+    connect().use(serveStatic(dirPath)).listen(8080, function() {
+        console.log("Listening...");
+    });
 });
